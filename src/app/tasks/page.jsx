@@ -1,9 +1,13 @@
-"use client"
+"use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FaPlus, FaRegListAlt } from "react-icons/fa"; // Added icons for add task and list
+import LoginFirst from "@/components/LoginFirst";
+import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
 
 export default function TasksPage() {
+  const { status } = useSession();
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -16,18 +20,22 @@ export default function TasksPage() {
   }, []);
 
   async function fetchTasks() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/v1/tasks");
-      if (!res.ok) throw new Error("Failed to fetch tasks");
-      const data = await res.json();
-      setTasks(data);
-      setError("");
-    } catch (err) {
-      console.error("Error fetching tasks:", err);
-      setError("Could not load tasks. Please try again.");
-    } finally {
-      setLoading(false);
+    if (status === "authenticated") {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/v1/tasks");
+        if (!res.ok) throw new Error("Failed to fetch tasks");
+        const data = await res.json();
+        setTasks(data);
+        setError("");
+      } catch (err) {
+        console.error("Error fetching tasks:", err);
+        setError("Could not load tasks. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    } else if (status === "unauthenticated") {
+      toast.error("Login First");
     }
   }
 
@@ -57,6 +65,18 @@ export default function TasksPage() {
     }
   }
 
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <span className="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full"></span>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return <LoginFirst />;
+  }
+
   return (
     <main className="min-h-screen px-4 py-8 sm:px-6 md:py-12 text-green-100 font-inter">
       <div className="max-w-4xl mx-auto">
@@ -66,27 +86,34 @@ export default function TasksPage() {
 
         {/* Task Creation Section */}
         <div className="bg-green-800/60 border border-green-700 p-6 rounded-xl shadow-2xl backdrop-blur-sm mb-10 space-y-4">
-          <h2 className="text-2xl font-bold text-lime-200 mb-4">Add New Task</h2>
+          <h2 className="text-2xl font-bold text-lime-200 mb-4">
+            Add New Task
+          </h2>
           <input
             type="text"
             placeholder="Task Title (e.g., Finish project report)"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full px-4 py-2 rounded-lg bg-green-800/70 border border-green-600 placeholder-green-400 text-green-100 focus:outline-none focus:ring-2 focus:ring-lime-500 transition duration-200"
           />
           <textarea
             placeholder="Description (optional, e.g., Include data analysis and conclusions)"
             value={description}
-            onChange={e => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value)}
             rows="3"
             className="w-full px-4 py-2 rounded-lg bg-green-800/70 border border-green-600 placeholder-green-400 text-green-100 focus:outline-none focus:ring-2 focus:ring-lime-500 transition duration-200 resize-y"
           />
-          <label htmlFor="dueDate" className="block text-green-300 text-sm mb-1">Due Date (optional):</label>
+          <label
+            htmlFor="dueDate"
+            className="block text-green-300 text-sm mb-1"
+          >
+            Due Date (optional):
+          </label>
           <input
             type="datetime-local"
             id="dueDate"
             value={dueDate}
-            onChange={e => setDueDate(e.target.value)}
+            onChange={(e) => setDueDate(e.target.value)}
             className="w-full px-4 py-2 rounded-lg bg-green-800/70 border border-green-600 text-green-100 focus:outline-none focus:ring-2 focus:ring-lime-500 transition duration-200"
           />
           <button
@@ -104,12 +131,16 @@ export default function TasksPage() {
         )}
 
         {loading ? (
-          <p className="text-green-300 text-lg text-center animate-pulse">Loading tasks...</p>
+          <p className="text-green-300 text-lg text-center animate-pulse">
+            Loading tasks...
+          </p>
         ) : tasks.length === 0 ? (
-          <p className="text-green-300 italic text-lg text-center">No tasks yet. Start by adding one above!</p>
+          <p className="text-green-300 italic text-lg text-center">
+            No tasks yet. Start by adding one above!
+          </p>
         ) : (
           <ul className="space-y-4">
-            {tasks.map(task => (
+            {tasks.map((task) => (
               <li key={task._id}>
                 <Link
                   href={`/tasks/${task._id}`}
@@ -141,7 +172,20 @@ export default function TasksPage() {
                   )}
                   <p className="text-lime-400 text-sm mt-3 inline-flex items-center group">
                     View Details
-                    <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    <svg
+                      className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      ></path>
+                    </svg>
                   </p>
                 </Link>
               </li>

@@ -29,15 +29,7 @@ import { signOut, useSession } from "next-auth/react";
 
 const baseMenuItems = [
   { title: "Home", url: "/", icon: Home },
-  { title: "Blogs", url: "/blogs", icon: Newspaper },
-  // { title: "Posts", url: "/posts", icon: BsFillPostcardFill },
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-];
-
-const createMenuItems = [
-  { title: "Create Blog", url: "/blogs/create", icon: PenSquare },
-  { title: "Create Category", url: "/blogs/category/create", icon: PenSquare },
-  { title: "Create Post", url: "/posts/create", icon: PenSquare },
+  { title: "Tasks", url: "/tasks", icon: Newspaper },
 ];
 
 const userItems = [
@@ -80,19 +72,6 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-
-              {/* Conditional Create Options */}
-              {isLoggedIn &&
-                createMenuItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.url} className="flex items-center gap-2">
-                        <item.icon size={18} />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
             </SidebarMenu>
           </SidebarGroupContent>
 
