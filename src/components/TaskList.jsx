@@ -1,210 +1,103 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
-import { FaRegTrashAlt, FaCheckCircle, FaTasks } from "react-icons/fa"; // Added icons for delete, checkmark, and tasks
+import { FaPlus, FaRegListAlt } from "react-icons/fa"; // Added icons for add task and list
 
-// Custom Confirmation Modal Component (reused from TaskDetail for consistency)
-const ConfirmModal = ({ message, onConfirm, onCancel }) => {
-  return (
-    <div className="fixed inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-green-800 border border-green-700 rounded-lg p-6 shadow-2xl max-w-sm w-full text-green-100">
-        <p className="text-lg font-semibold mb-6 text-center">{message}</p>
-        <div className="flex justify-around gap-4">
-          <button
-            onClick={onConfirm}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 transform hover:scale-105 shadow-md"
-          >
-            Confirm
-          </button>
-          <button
-            onClick={onCancel}
-            className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 transform hover:scale-105 shadow-md"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default function TaskList({ parentId = null }) {
+export default function TaskList() {
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [taskToDeleteId, setTaskToDeleteId] = useState(null);
 
   useEffect(() => {
     fetchTasks();
-  }, [parentId]);
+  }, []);
 
-  const fetchTasks = async () => {
+  async function fetchTasks() {
     setLoading(true);
-    setError("");
     try {
-      const url = `/api/v1/tasks${parentId ? `?parent=${parentId}` : ""}`;
-      const res = await fetch(url);
+      const res = await fetch("/api/v1/tasks");
       if (!res.ok) throw new Error("Failed to fetch tasks");
       const data = await res.json();
       setTasks(data);
+      setError("");
     } catch (err) {
       console.error("Error fetching tasks:", err);
-      setError("Could not load tasks.");
+      setError("Could not load tasks. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const toggleDone = async (id, status) => {
-    const nextStatus = status === "done" ? "todo" : "done";
-    try {
-      await fetch(`/api/v1/tasks?id=${id}`, {
-        method: "PUT",
-        body: JSON.stringify({ status: nextStatus }),
-        headers: { "Content-Type": "application/json" },
-      });
-      fetchTasks(); // Re-fetch to update the list
-    } catch (err) {
-      console.error("Error toggling task status:", err);
-      setError("Could not update task status.");
-    }
-  };
-
-  const handleDeleteClick = (id) => {
-    setTaskToDeleteId(id);
-    setShowConfirmModal(true);
-  };
-
-  const confirmRemove = async () => {
-    setShowConfirmModal(false);
-    if (!taskToDeleteId) return;
-    try {
-      await fetch(`/api/v1/tasks?id=${taskToDeleteId}`, {
-        method: "DELETE",
-      });
-      setTaskToDeleteId(null);
-      fetchTasks(); // Re-fetch to update the list
-    } catch (err) {
-      console.error("Error deleting task:", err);
-      setError("Could not delete task.");
-    }
-  };
-
-  const handleCancelModal = () => {
-    setShowConfirmModal(false);
-    setTaskToDeleteId(null);
-  };
-
-  if (loading) {
-    return (
-      <div className="mt-16 text-center text-green-300 text-lg animate-pulse">
-        Loading {parentId ? "subtasks" : "tasks"}...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="mt-16 text-center text-red-400 bg-red-900/30 border border-red-700 p-3 rounded-md">
-        {error}
-      </div>
-    );
   }
 
   return (
-    <div className="mt-10 md:mt-16">
-      <h2 className="text-3xl font-bold text-lime-300 mb-6 flex items-center gap-3">
-        {parentId ? (
-          <>🌿 Subtasks</>
+    <main className="px-4 py-8 sm:px-6 md:py-12 text-green-100 font-inter">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-xl font-semibold py-2 my-2 text-green-300">Tasks</h2>
+        {loading ? (
+          <p className="text-green-300 text-lg text-center animate-pulse">
+            Loading tasks...
+          </p>
+        ) : tasks.length === 0 ? (
+          <p className="text-green-300 italic text-lg text-center">
+            No tasks yet. Start by adding one above!
+          </p>
         ) : (
-          <>
-            <FaTasks className="text-lime-400" /> All Tasks
-          </>
-        )}
-      </h2>
-
-      {tasks.length === 0 ? (
-        <p className="text-green-300 italic text-lg text-center">
-          No {parentId ? "subtasks" : "tasks"} yet.
-        </p>
-      ) : (
-        <div className="space-y-4">
-          {tasks.map((t) => (
-            <div
-              key={t._id}
-              className="bg-green-800/60 border border-green-700 rounded-xl p-5 text-green-100 shadow-lg transition duration-300 hover:bg-green-700/60 transform hover:-translate-y-1"
-            >
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                {/* Title & Link */}
-                <div className="flex-1 mb-3 sm:mb-0">
-                  <Link href={`/tasks/${t._id}`} className="block">
-                    <h3 className="text-xl font-bold text-lime-200 hover:underline">
-                      {t.title}
-                    </h3>
-                  </Link>
-                  {t.description && (
-                    <p className="text-green-300 text-sm mt-1 line-clamp-2">
-                      {t.description}
-                    </p>
-                  )}
-                  {t.dueDate && (
-                    <p className="text-green-400 text-xs mt-2">
-                      Due: {new Date(t.dueDate).toLocaleString()}
-                    </p>
-                  )}
-                  <p className="text-sm text-green-300 flex flex-nowrap gap-2 items-center mt-2">
-                    Status:{" "}
+          <ul className="space-y-4">
+            {tasks.map((task) => (
+              <li key={task._id}>
+                <Link
+                  href={`/tasks/${task._id}`}
+                  className="block bg-green-800/60 hover:bg-green-700/60 transition duration-300 border border-green-700 p-5 rounded-xl shadow-lg transform hover:-translate-y-1"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
+                    <span className="text-xl font-bold text-lime-200 mb-1 sm:mb-0">
+                      {task.title}
+                    </span>
                     <span
-                      className={`px-2 py-0.5 text-xs rounded-full font-medium capitalize ${
-                        t.status === "done"
+                      className={`px-3 py-1 text-sm rounded-full font-medium capitalize ${
+                        task.status === "done"
                           ? "bg-lime-500 text-black"
                           : "bg-green-700 text-lime-300 border border-green-600"
                       }`}
                     >
-                      {t.status}
+                      {task.status}
                     </span>
-                    {t.status === "done" && (
-                      <IoCheckmarkDoneCircleSharp className="text-blue-400 text-lg" />
-                    )}
+                  </div>
+                  {task.description && (
+                    <p className="text-green-300 text-sm mb-2 line-clamp-2">
+                      {task.description}
+                    </p>
+                  )}
+                  {task.dueDate && (
+                    <p className="text-green-400 text-xs mt-1">
+                      Due: {new Date(task.dueDate).toLocaleString()}
+                    </p>
+                  )}
+                  <p className="text-lime-400 text-sm mt-3 inline-flex items-center group">
+                    View Details
+                    <svg
+                      className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      ></path>
+                    </svg>
                   </p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-wrap gap-3 mt-4 sm:mt-0 sm:ml-4 justify-end">
-                  <button
-                    onClick={() => toggleDone(t._id, t.status)}
-                    className={`flex-1 min-w-[100px] px-4 py-2 rounded-lg font-semibold text-black transition duration-300 transform hover:scale-105 shadow-md flex items-center justify-center gap-2
-                      ${
-                        t.status === "done"
-                          ? "bg-amber-400 hover:bg-amber-300"
-                          : "bg-lime-500 hover:bg-lime-400"
-                      }`}
-                  >
-                    <FaCheckCircle className="text-sm" />
-                    {t.status === "done" ? "Reopen" : "Mark Done"}
-                  </button>
-                  <button
-                    onClick={() => handleDeleteClick(t._id)}
-                    className="flex-1 min-w-[100px] bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-300 transform hover:scale-105 shadow-md flex items-center justify-center gap-2"
-                  >
-                    <FaRegTrashAlt className="text-sm" /> Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {showConfirmModal && (
-        <ConfirmModal
-          message="Are you sure you want to delete this task?"
-          onConfirm={confirmRemove}
-          onCancel={handleCancelModal}
-        />
-      )}
-    </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </main>
   );
 }

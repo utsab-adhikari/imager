@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation"; // Assuming Next.js environment
 import Link from "next/link";
 import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
-import { FaRegTrashAlt, FaPlus } from "react-icons/fa"; // Icons for delete, add
+import { FaRegTrashAlt, FaPlus, FaCheckCircle, FaUndo } from "react-icons/fa"; // Added FaUndo and FaCheckCircle
 import { MdOutlineAccessTimeFilled } from "react-icons/md"; // Icon for countdown
 
 // --- Helper Functions ---
@@ -96,17 +96,22 @@ export default function TaskDetail() {
   const [subtasks, setSubtasks] = useState([]);
   const [newSubtask, setNewSubtask] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(""); // State for displaying errors
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [modalAction, setModalAction] = useState(null); // 'deleteTask' or 'deleteSubtask'
   const [subtaskToDelete, setSubtaskToDelete] = useState(null); // Stores subtask object for deletion
 
   const fetchTaskData = useCallback(async () => {
     setLoading(true);
+    setError(""); // Clear previous errors on new fetch
     try {
       const [taskRes, subtaskRes] = await Promise.all([
         fetch(`/api/v1/tasks?id=${id}`),
         fetch(`/api/v1/tasks?parent=${id}`),
       ]);
+
+      if (!taskRes.ok) throw new Error("Failed to fetch main task.");
+      if (!subtaskRes.ok) throw new Error("Failed to fetch subtasks.");
 
       const taskData = await taskRes.json();
       const subtaskData = await subtaskRes.json();
@@ -115,6 +120,7 @@ export default function TaskDetail() {
       setSubtasks(subtaskData);
     } catch (error) {
       console.error("Error fetching task details:", error);
+      setError("Could not load task details. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -127,16 +133,23 @@ export default function TaskDetail() {
   const toggleStatus = async () => {
     if (!task) return;
     const nextStatus = task.status === "done" ? "todo" : "done";
+    const originalTask = task; // Save original for rollback
+    // Optimistic update for main task
+    setTask(prevTask => ({ ...prevTask, status: nextStatus }));
+
     try {
       const res = await fetch(`/api/v1/tasks?id=${task._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus }),
       });
+      if (!res.ok) throw new Error("Failed to update task status.");
       const updated = await res.json();
-      setTask(updated);
+      setTask(updated); // Update with actual response to ensure consistency
     } catch (error) {
       console.error("Error toggling task status:", error);
+      setError("Could not update task status.");
+      setTask(originalTask); // Rollback on error
     }
   };
 
@@ -149,39 +162,69 @@ export default function TaskDetail() {
     setShowConfirmModal(false);
     if (!task) return;
     try {
-      await fetch(`/api/v1/tasks?id=${task._id}`, { method: "DELETE" });
+      const res = await fetch(`/api/v1/tasks?id=${task._id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete task.");
       router.push("/tasks");
     } catch (error) {
       console.error("Error deleting task:", error);
+      setError("Could not delete task.");
     }
   };
 
   const addSubtask = async () => {
-    if (!newSubtask.trim()) return;
+    if (!newSubtask.trim()) {
+      setError("Subtask title cannot be empty.");
+      return;
+    }
+    setError(""); // Clear previous errors
+    const tempId = `temp-${Date.now()}`; // Temporary ID for optimistic update
+    const optimisticSubtask = { _id: tempId, title: newSubtask, status: "todo", parent: id, description: "" }; // Include description for consistency if needed
+
+    setSubtasks(prev => [...prev, optimisticSubtask]); // Optimistic add
+    setNewSubtask(""); // Clear input immediately
+
     try {
-      await fetch("/api/v1/tasks", {
+      const res = await fetch("/api/v1/tasks", {
         method: "POST",
-        body: JSON.stringify({ title: newSubtask, parent: id }),
+        body: JSON.stringify({ title: optimisticSubtask.title, parent: id }),
         headers: { "Content-Type": "application/json" },
       });
-      setNewSubtask("");
-      fetchTaskData();
+      if (!res.ok) throw new Error("Failed to add subtask.");
+      const addedSubtask = await res.json();
+      // Replace optimistic entry with real one from API response
+      setSubtasks(prev => prev.map(s => s._id === tempId ? addedSubtask : s));
     } catch (error) {
       console.error("Error adding subtask:", error);
+      setError("Could not add subtask.");
+      setSubtasks(prev => prev.filter(s => s._id !== tempId)); // Rollback on error
     }
   };
 
   const toggleSubtaskStatus = async (sub) => {
-    const next = sub.status === "done" ? "todo" : "done";
+    const nextStatus = sub.status === "done" ? "todo" : "done";
+    const originalSubtasks = subtasks; // Save original for rollback
+
+    // Optimistic update
+    setSubtasks(prevSubtasks =>
+      prevSubtasks.map(s =>
+        s._id === sub._id ? { ...s, status: nextStatus } : s
+      )
+    );
+
     try {
-      await fetch(`/api/v1/tasks?id=${sub._id}`, {
+      const res = await fetch(`/api/v1/tasks?id=${sub._id}`, {
         method: "PUT",
-        body: JSON.stringify({ status: next }),
+        body: JSON.stringify({ status: nextStatus }),
         headers: { "Content-Type": "application/json" },
       });
-      fetchTaskData(); // Re-fetch all data to ensure consistency
+      if (!res.ok) throw new Error("Failed to update subtask status.");
+      // If API returns updated subtask, could use that:
+      // const updatedSub = await res.json();
+      // setSubtasks(prevSubtasks => prevSubtasks.map(s => s._id === updatedSub._id ? updatedSub : s));
     } catch (error) {
       console.error("Error toggling subtask status:", error);
+      setError("Could not update subtask status.");
+      setSubtasks(originalSubtasks); // Rollback on error
     }
   };
 
@@ -194,14 +237,21 @@ export default function TaskDetail() {
   const confirmDeleteSubtask = async () => {
     setShowConfirmModal(false);
     if (!subtaskToDelete) return;
+    const originalSubtasks = subtasks; // Save for rollback
+    const deletedId = subtaskToDelete._id;
+
+    setSubtasks(prev => prev.filter(s => s._id !== deletedId)); // Optimistic delete
+    setSubtaskToDelete(null); // Clear reference
+
     try {
-      await fetch(`/api/v1/tasks?id=${subtaskToDelete._id}`, {
+      const res = await fetch(`/api/v1/tasks?id=${deletedId}`, {
         method: "DELETE",
       });
-      setSubtaskToDelete(null);
-      fetchTaskData(); // Re-fetch all data to ensure consistency
+      if (!res.ok) throw new Error("Failed to delete subtask.");
     } catch (error) {
       console.error("Error deleting subtask:", error);
+      setError("Could not delete subtask.");
+      setSubtasks(originalSubtasks); // Rollback on error
     }
   };
 
@@ -213,7 +263,7 @@ export default function TaskDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen text-green-200 flex items-center justify-center font-inter">
+      <div className="min-h-screen to-green-950 text-green-200 flex items-center justify-center font-inter">
         <p className="text-xl animate-pulse">Loading task details...</p>
       </div>
     );
@@ -221,20 +271,26 @@ export default function TaskDetail() {
 
   if (!task) {
     return (
-      <div className="min-h-screen text-red-400 flex items-center justify-center font-inter">
+      <div className="min-h-screen to-green-950 text-red-400 flex items-center justify-center font-inter">
         <p className="text-xl">Task not found 😔</p>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen text-green-100 px-4 py-8 sm:px-6 md:py-12 font-inter">
+    <main className="min-h-screen to-green-950 text-green-100 px-4 py-8 sm:px-6 md:py-12 font-inter">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Back Button */}
         <Link href="/tasks" className="inline-flex items-center text-lime-400 hover:text-lime-300 transition duration-300 text-base font-medium group">
           <svg className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
           Back to Task List
         </Link>
+
+        {error && (
+          <p className="text-red-400 bg-red-900/30 border border-red-700 p-3 rounded-md mb-6 text-center">
+            {error}
+          </p>
+        )}
 
         {/* Main Task Card and Countdown */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -256,10 +312,10 @@ export default function TaskDetail() {
             <div className="flex flex-wrap gap-3 mt-5">
               <button
                 onClick={toggleStatus}
-                className={`flex-1 min-w-[120px] px-5 py-2 rounded-lg font-semibold text-black transition duration-300 transform hover:scale-105 shadow-lg
+                className={`flex-1 min-w-[120px] px-5 py-2 rounded-lg font-semibold text-black transition duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2
                   ${task.status === "done" ? "bg-amber-400 hover:bg-amber-300" : "bg-lime-500 hover:bg-lime-400"}`}
               >
-                {task.status === "done" ? "Reopen Task" : "Mark Done"}
+                {task.status === "done" ? (<><FaUndo className="text-sm" /> Reopen Task</>) : (<><FaCheckCircle className="text-sm" /> Mark Done</>)}
               </button>
               <button
                 onClick={handleDeleteTask}
@@ -299,10 +355,10 @@ export default function TaskDetail() {
                   <div className="flex flex-wrap gap-2 sm:ml-4">
                     <button
                       onClick={() => toggleSubtaskStatus(sub)}
-                      className={`flex-1 min-w-[80px] text-sm px-3 py-1 rounded-md font-semibold text-black transition duration-300 transform hover:scale-105 shadow-sm
+                      className={`flex-1 min-w-[80px] text-sm px-3 py-1 rounded-md font-semibold text-black transition duration-300 transform hover:scale-105 shadow-sm flex items-center justify-center gap-1
                         ${sub.status === "done" ? "bg-amber-400 hover:bg-amber-300" : "bg-lime-500 hover:bg-lime-400"}`}
                     >
-                      {sub.status === "done" ? "Reopen" : "Mark Done"}
+                      {sub.status === "done" ? (<><FaUndo className="text-xs" /> Reopen</>) : (<><FaCheckCircle className="text-xs" /> Mark Done</>)}
                     </button>
                     <button
                       onClick={() => handleDeleteSubtask(sub)}
@@ -321,7 +377,7 @@ export default function TaskDetail() {
             <input
               value={newSubtask}
               onChange={e => setNewSubtask(e.target.value)}
-              placeholder="New subtask"
+              placeholder="Add new subtask..."
               className="flex-1 px-4 py-2 rounded-lg bg-green-800/70 border border-green-600 placeholder-green-400 text-green-100 focus:outline-none focus:ring-2 focus:ring-lime-500 transition duration-200"
             />
             <button
