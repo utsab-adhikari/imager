@@ -171,8 +171,8 @@ export default function ProgressListPage() {
 
       {/* Drawer */}
       {showDrawer && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-end z-50 animate-slide-in-right">
-          <div className="w-full sm:w-96 bg-green-900 border-l border-green-700 p-6 h-full shadow-2xl relative">
+        <div className="fixed inset-0 bg-white/5 backdrop-blur-sm flex justify-end z-50 animate-slide-in-right">
+          <div className="w-full sm:w-96 bg-black/60 border-l border-green-700 p-6 h-full shadow-2xl relative">
             <button
               onClick={() => setShowDrawer(false)}
               className="absolute top-4 right-4 text-green-300 hover:text-red-400 transition duration-300 text-2xl"
