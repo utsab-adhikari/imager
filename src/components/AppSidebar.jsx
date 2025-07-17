@@ -26,10 +26,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { signOut, useSession } from "next-auth/react";
+import { GiProgression } from "react-icons/gi";
 
 const baseMenuItems = [
   { title: "Home", url: "/", icon: Home },
   { title: "Tasks", url: "/tasks", icon: Newspaper },
+  { title: "Progress", url: "/progress", icon: GiProgression },
 ];
 
 const userItems = [
