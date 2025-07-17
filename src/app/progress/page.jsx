@@ -6,6 +6,8 @@ import Link from "next/link";
 import { FaPlus, FaChartLine, FaTimes } from "react-icons/fa"; // Added icons
 import { MdOutlineDateRange } from "react-icons/md"; // Icon for day number
 import { useSession } from "next-auth/react";
+import LoginFirst from "@/components/LoginFirst";
+import toast from "react-hot-toast";
 
 // Custom Error Message Component
 const ErrorMessage = ({ message }) => {
@@ -36,6 +38,7 @@ export default function ProgressListPage() {
   }, []);
 
   const fetchProgresses = async () => {
+    if(status === "authenticated") {
     setLoading(true);
     setError(""); // Clear previous errors
     try {
@@ -49,6 +52,9 @@ export default function ProgressListPage() {
     } finally {
       setLoading(false);
     }
+} else if (status === "unauthenticated") {
+    toast.error("Login first");
+}
   };
 
   const handleCreate = async () => {
