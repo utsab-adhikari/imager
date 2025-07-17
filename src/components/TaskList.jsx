@@ -7,7 +7,7 @@ import { FaRegTrashAlt, FaCheckCircle, FaTasks } from "react-icons/fa"; // Added
 // Custom Confirmation Modal Component (reused from TaskDetail for consistency)
 const ConfirmModal = ({ message, onConfirm, onCancel }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-green-800 border border-green-700 rounded-lg p-6 shadow-2xl max-w-sm w-full text-green-100">
         <p className="text-lg font-semibold mb-6 text-center">{message}</p>
         <div className="flex justify-around gap-4">
