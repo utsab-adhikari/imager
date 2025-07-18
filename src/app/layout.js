@@ -10,7 +10,6 @@ import { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
 import { FaHome } from 'react-icons/fa';
 import Footer from '@/components/Footer';
-import Script from 'next/script';
 import { SessionProvider } from 'next-auth/react';
 
 export default function RootLayout({ children }) {
@@ -23,64 +22,63 @@ export default function RootLayout({ children }) {
   }, [pathname]);
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark scroll-smooth">
       <head>
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-1ZMEDGLMSL"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-1ZMEDGLMSL', {
-              page_path: window.location.pathname,
-            });
-          `}
-        </Script>
+        <title>Project Manager Dashboard</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
 
-      <body className="flex min-h-screen flex-col bg-gradient-to-br from-green-950 via-green-900 to-green-950 text-white">
+      <body className="flex min-h-screen flex-col bg-[#0f1117] text-white font-sans">
         <SessionProvider>
           <SidebarProvider>
-            <div className="flex flex-1 w-full">
+            <div className="flex w-full flex-1">
+              {/* Sidebar + Sidebar Toggle */}
               <AppSidebar />
-              <SidebarTrigger className="fixed z-30 top-2 left-2" />
+              <SidebarTrigger className="fixed z-30 top-3 left-3 md:left-2" />
 
+              {/* Back Button (when not on home/slide) */}
               {!isIndex && (
                 <button
-                  className="fixed top-12 z-30 md:top-3 left-2 md:left-64 cursor-pointer text-white hover:text-gray-300"
                   onClick={() => router.back()}
+                  className="fixed z-30 top-16 md:top-4 left-3 md:left-64 bg-[#1c1e26] text-white hover:text-lime-300 hover:bg-[#22252e] p-2 rounded-full shadow-sm transition"
                 >
-                  <IoMdArrowRoundBack size={24} />
+                  <IoMdArrowRoundBack size={22} />
                 </button>
               )}
 
-              <div className="flex flex-1 flex-col bg-black/90">
-                <main className="flex flex-1 w-full min-h-screen">
-                  <Toaster
-                    position="bottom-center"
-                    toastOptions={{
-                      style: {
-                        background: '#14532d',
-                        color: '#d1fae5',
-                      },
-                    }}
-                  />
+              <div className="flex flex-1 flex-col bg-black/90 relative">
+                {/* Toast */}
+                <Toaster
+                  position="bottom-center"
+                  toastOptions={{
+                    style: {
+                      background: '#1c1e26',
+                      color: '#d1fae5',
+                      border: '1px solid #14532d',
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                    },
+                  }}
+                />
+
+                {/* Main content */}
+                <main className="flex flex-1 w-full min-h-screen px-2 sm:px-4">
                   <div className="w-full">{children}</div>
                 </main>
-
+                {/* Mobile Home Link */}
                 {!isIndex && (
-                  <Link
-                    href="/"
-                    className="block md:hidden mx-auto py-2 my-3 px-5 border border-lime-600 rounded-full text-lime-300 hover:bg-lime-800 hover:text-white transition-all duration-200 flex items-center gap-2 w-fit"
-                  >
-                    <FaHome />
-                    Home
-                  </Link>
+                  <div className="block md:hidden text-center my-6">
+                    <Link
+                      href="/"
+                      className="inline-flex items-center gap-2 px-5 py-2 text-lime-400 hover:text-white border border-lime-600 hover:bg-lime-700 rounded-full transition-all"
+                    >
+                      <FaHome />
+                      Home
+                    </Link>
+                  </div>
                 )}
 
+
+                {/* Footer */}
                 <Footer />
               </div>
             </div>

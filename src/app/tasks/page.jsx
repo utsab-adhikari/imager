@@ -78,99 +78,109 @@ export default function TasksPage() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-8 sm:px-6 md:py-12 text-green-100 font-inter">
+    <main className="min-h-screen px-4 py-10 sm:px-6 md:py-14 font-inter text-white bg-gradient-to-br from-[#0e0e1a] via-[#111827] to-[#0e0e1a]">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-lime-300 mb-8 text-center flex items-center justify-center gap-4">
-          <FaRegListAlt className="text-lime-400" /> Task Manager
+        <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-300 mb-10 text-center flex items-center justify-center gap-3">
+          <FaRegListAlt className="text-indigo-400" /> Task Manager
         </h1>
 
-        {/* Task Creation Section */}
-        <div className="bg-green-800/60 border border-green-700 p-6 rounded-xl shadow-2xl backdrop-blur-sm mb-10 space-y-4">
-          <h2 className="text-2xl font-bold text-lime-200 mb-4">
+        {/* Add Task Section */}
+        <div className="bg-[#1f2937] border border-[#374151] p-6 rounded-2xl shadow-xl mb-12 space-y-5">
+          <h2 className="text-2xl font-semibold text-indigo-200">
             Add New Task
           </h2>
+
           <input
             type="text"
             placeholder="Task Title (e.g., Finish project report)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg bg-green-800/70 border border-green-600 placeholder-green-400 text-green-100 focus:outline-none focus:ring-2 focus:ring-lime-500 transition duration-200"
+            className="w-full px-4 py-3 rounded-md bg-[#111827] border border-[#374151] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
           />
+
           <textarea
-            placeholder="Description (optional, e.g., Include data analysis and conclusions)"
+            placeholder="Description (optional)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows="3"
-            className="w-full px-4 py-2 rounded-lg bg-green-800/70 border border-green-600 placeholder-green-400 text-green-100 focus:outline-none focus:ring-2 focus:ring-lime-500 transition duration-200 resize-y"
+            className="w-full px-4 py-3 rounded-md bg-[#111827] border border-[#374151] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition resize-y"
           />
-          <label
-            htmlFor="dueDate"
-            className="block text-green-300 text-sm mb-1"
-          >
-            Due Date (optional):
-          </label>
-          <input
-            type="datetime-local"
-            id="dueDate"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg bg-green-800/70 border border-green-600 text-green-100 focus:outline-none focus:ring-2 focus:ring-lime-500 transition duration-200"
-          />
+
+          <div>
+            <label
+              htmlFor="dueDate"
+              className="block text-gray-400 text-sm mb-1"
+            >
+              Due Date (optional):
+            </label>
+            <input
+              type="datetime-local"
+              id="dueDate"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-full px-4 py-3 rounded-md bg-[#111827] border border-[#374151] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            />
+          </div>
+
           <button
             onClick={createTask}
-            className="w-full bg-lime-500 hover:bg-lime-400 text-black font-semibold px-5 py-3 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 mt-4"
+            className="w-full mt-4 px-5 py-3 rounded-lg font-medium bg-indigo-500 hover:bg-indigo-400 text-white shadow-md hover:shadow-xl hover:scale-[1.02] transition flex items-center justify-center gap-2"
           >
             <FaPlus /> Create Task
           </button>
         </div>
 
+        {/* Error Message */}
         {error && (
-          <p className="text-red-400 bg-red-900/30 border border-red-700 p-3 rounded-md mb-6 text-center">
+          <p className="text-red-300 bg-red-900/30 border border-red-700 px-4 py-3 rounded-md mb-8 text-center text-sm shadow-sm">
             {error}
           </p>
         )}
 
+        {/* Task List */}
         {loading ? (
-          <p className="text-green-300 text-lg text-center animate-pulse">
+          <p className="text-indigo-300 text-lg text-center animate-pulse">
             Loading tasks...
           </p>
         ) : tasks.length === 0 ? (
-          <p className="text-green-300 italic text-lg text-center">
+          <p className="text-gray-400 italic text-lg text-center">
             No tasks yet. Start by adding one above!
           </p>
         ) : (
-          <ul className="space-y-4">
+          <ul className="space-y-5">
             {tasks.map((task) => (
               <li key={task._id}>
                 <Link
                   href={`/tasks/${task._id}`}
-                  className="block bg-green-800/60 hover:bg-green-700/60 transition duration-300 border border-green-700 p-5 rounded-xl shadow-lg transform hover:-translate-y-1"
+                  className="block bg-[#1e293b] hover:bg-[#334155] transition-all duration-300 border border-[#475569] p-5 rounded-xl shadow-lg transform hover:-translate-y-1"
                 >
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
-                    <span className="text-xl font-bold text-lime-200 mb-1 sm:mb-0">
+                    <span className="text-xl font-semibold text-indigo-200">
                       {task.title}
                     </span>
                     <span
-                      className={`px-3 py-1 text-sm rounded-full font-medium capitalize ${
+                      className={`mt-2 sm:mt-0 px-3 py-1 text-xs sm:text-sm rounded-full font-medium capitalize ${
                         task.status === "done"
-                          ? "bg-lime-500 text-black"
-                          : "bg-green-700 text-lime-300 border border-green-600"
+                          ? "bg-indigo-500 text-white"
+                          : "bg-gray-700 text-indigo-300 border border-gray-600"
                       }`}
                     >
                       {task.status}
                     </span>
                   </div>
+
                   {task.description && (
-                    <p className="text-green-300 text-sm mb-2 line-clamp-2">
+                    <p className="text-gray-300 text-sm mb-2 line-clamp-2">
                       {task.description}
                     </p>
                   )}
                   {task.dueDate && (
-                    <p className="text-green-400 text-xs mt-1">
+                    <p className="text-indigo-400 text-xs">
                       Due: {new Date(task.dueDate).toLocaleString()}
                     </p>
                   )}
-                  <p className="text-lime-400 text-sm mt-3 inline-flex items-center group">
+
+                  <p className="text-indigo-300 text-sm mt-3 inline-flex items-center group">
                     View Details
                     <svg
                       className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"
@@ -184,7 +194,7 @@ export default function TasksPage() {
                         strokeLinejoin="round"
                         strokeWidth="2"
                         d="M17 8l4 4m0 0l-4 4m4-4H3"
-                      ></path>
+                      />
                     </svg>
                   </p>
                 </Link>

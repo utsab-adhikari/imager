@@ -278,125 +278,112 @@ export default function TaskDetail() {
   }
 
   return (
-    <main className="min-h-screen to-green-950 text-green-100 px-4 py-8 sm:px-6 md:py-12 font-inter">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Back Button */}
-        <Link href="/tasks" className="inline-flex items-center text-lime-400 hover:text-lime-300 transition duration-300 text-base font-medium group">
-          <svg className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-          Back to Task List
-        </Link>
+<main className="min-h-screen bg-[#0f1117] text-white px-4 py-8 sm:px-6 md:py-12 font-inter">
+  <div className="max-w-4xl mx-auto space-y-8">
 
-        {error && (
-          <p className="text-red-400 bg-red-900/30 border border-red-700 p-3 rounded-md mb-6 text-center">
-            {error}
-          </p>
-        )}
+    {/* Error */}
+    {error && (
+      <div className="bg-red-900/30 border border-red-700 text-red-300 p-3 rounded-md shadow-sm text-center">
+        {error}
+      </div>
+    )}
 
-        {/* Main Task Card and Countdown */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 bg-green-800/60 border border-green-700 p-6 rounded-xl shadow-2xl backdrop-blur-sm">
-            <h2 className="text-3xl font-extrabold text-lime-300 mb-3 flex items-center gap-3">
-              <span className="text-4xl">🎯</span> {task.title}
-            </h2>
-            {task.description && (
-              <p className="text-base text-green-300 mb-3">{task.description}</p>
-            )}
-            <p className="text-sm text-green-300 mb-2 flex items-center gap-2">
-              Status: <span className="font-semibold capitalize">{task.status}</span>
-              {task.status === "done" && (
-                <IoCheckmarkDoneCircleSharp className="text-blue-400 text-xl" />
-              )}
-            </p>
-            <p className="text-green-400 text-xs mb-4">Task ID: <span className="font-mono">{task._id}</span></p>
-
-            <div className="flex flex-wrap gap-3 mt-5">
-              <button
-                onClick={toggleStatus}
-                className={`flex-1 min-w-[120px] px-5 py-2 rounded-lg font-semibold text-black transition duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2
-                  ${task.status === "done" ? "bg-amber-400 hover:bg-amber-300" : "bg-lime-500 hover:bg-lime-400"}`}
-              >
-                {task.status === "done" ? (<><FaUndo className="text-sm" /> Reopen Task</>) : (<><FaCheckCircle className="text-sm" /> Mark Done</>)}
-              </button>
-              <button
-                onClick={handleDeleteTask}
-                className="flex-1 min-w-[120px] bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-semibold transition duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-              >
-                <FaRegTrashAlt /> Delete Task
-              </button>
-            </div>
-          </div>
-
-          {/* Countdown Card */}
-          <div className="md:col-span-1">
-            <CountdownDisplay dueDate={task.dueDate} />
-          </div>
-        </div>
-
-        {/* Subtasks Section */}
-        <div className="bg-green-800/60 border border-green-700 p-6 rounded-xl shadow-2xl backdrop-blur-sm">
-          <h3 className="text-2xl font-bold text-lime-200 mb-4 flex items-center gap-2">
-            <span className="text-3xl">🌿</span> Subtasks
-          </h3>
-          {subtasks.length === 0 ? (
-            <p className="text-green-400 text-base italic mb-6">No subtasks yet. Add one below!</p>
-          ) : (
-            <ul className="space-y-4 mb-6">
-              {subtasks.map((sub) => (
-                <li
-                  key={sub._id}
-                  className="bg-green-700/50 border border-green-600 p-4 rounded-md flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-md transition duration-300 hover:bg-green-700/70"
-                >
-                  <div className="flex-1 mb-2 sm:mb-0">
-                    <Link href={`/tasks/${sub._id}`} className="block hover:underline text-lime-300 font-medium text-lg">
-                      {sub.title}
-                    </Link>
-                    <span className="ml-0 sm:ml-2 text-green-300 text-sm">Status: <span className="capitalize">{sub.status}</span></span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 sm:ml-4">
-                    <button
-                      onClick={() => toggleSubtaskStatus(sub)}
-                      className={`flex-1 min-w-[80px] text-sm px-3 py-1 rounded-md font-semibold text-black transition duration-300 transform hover:scale-105 shadow-sm flex items-center justify-center gap-1
-                        ${sub.status === "done" ? "bg-amber-400 hover:bg-amber-300" : "bg-lime-500 hover:bg-lime-400"}`}
-                    >
-                      {sub.status === "done" ? (<><FaUndo className="text-xs" /> Reopen</>) : (<><FaCheckCircle className="text-xs" /> Mark Done</>)}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteSubtask(sub)}
-                      className="flex-1 min-w-[80px] bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded-md font-semibold transition duration-300 transform hover:scale-105 shadow-sm flex items-center justify-center gap-1"
-                    >
-                      <FaRegTrashAlt className="text-xs" /> Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Add Subtask */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input
-              value={newSubtask}
-              onChange={e => setNewSubtask(e.target.value)}
-              placeholder="Add new subtask..."
-              className="flex-1 px-4 py-2 rounded-lg bg-green-800/70 border border-green-600 placeholder-green-400 text-green-100 focus:outline-none focus:ring-2 focus:ring-lime-500 transition duration-200"
-            />
-            <button
-              onClick={addSubtask}
-              className="bg-lime-500 hover:bg-lime-400 text-black font-semibold px-5 py-2 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-            >
-              <FaPlus /> Add Subtask
-            </button>
-          </div>
+    {/* Task Header + Countdown */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="md:col-span-2 bg-[#1e293b] border border-slate-700 p-6 rounded-xl shadow-md space-y-4">
+        <h2 className="text-3xl font-bold text-teal-300">{task.title}</h2>
+        {task.description && <p className="text-slate-300">{task.description}</p>}
+        <p className="text-sm text-slate-400">ID: <span className="font-mono">{task._id}</span></p>
+        <p className="flex items-center gap-2 text-slate-300">
+          Status: <span className="capitalize">{task.status}</span>
+          {task.status === "done" && <IoCheckmarkDoneCircleSharp className="text-teal-400 text-xl" />}
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={toggleStatus}
+            className={`px-5 py-2 rounded-lg font-semibold text-black transition transform hover:scale-105 shadow-md ${
+              task.status === "done"
+                ? "bg-slate-400 hover:bg-slate-300"
+                : "bg-teal-500 hover:bg-teal-400"
+            }`}
+          >
+            {task.status === "done" ? "Reopen Task" : "Mark Done"}
+          </button>
+          <button
+            onClick={handleDeleteTask}
+            className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition transform hover:scale-105 shadow-md"
+          >
+            Delete Task
+          </button>
         </div>
       </div>
 
-      {showConfirmModal && (
-        <ConfirmModal
-          message={modalAction === 'deleteTask' ? "Are you sure you want to delete this task and its subtasks?" : "Are you sure you want to delete this subtask?"}
-          onConfirm={modalAction === 'deleteTask' ? confirmDeleteTask : confirmDeleteSubtask}
-          onCancel={handleCancelModal}
-        />
+      <CountdownDisplay dueDate={task.dueDate} />
+    </div>
+
+    {/* Subtasks */}
+    <div className="bg-[#1e293b] border border-slate-700 p-6 rounded-xl shadow-md space-y-4">
+      <h3 className="text-2xl font-semibold text-teal-300">Subtasks</h3>
+      {subtasks.length > 0 ? (
+        <ul className="space-y-3">
+          {subtasks.map((sub) => (
+            <li key={sub._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#24303f] border border-slate-600 p-4 rounded-md transition hover:bg-[#2c3a4e]">
+              <div className="flex-1 space-y-1">
+                <Link href={`/tasks/${sub._id}`} className="text-teal-300 font-medium hover:underline">{sub.title}</Link>
+                <p className="text-slate-400 text-sm">Status: {sub.status}</p>
+              </div>
+              <div className="flex gap-2 mt-2 sm:mt-0">
+                <button
+                  onClick={() => toggleSubtaskStatus(sub)}
+                  className={`px-3 py-1 rounded-md font-semibold text-black transition transform hover:scale-105 shadow-sm ${
+                    sub.status === "done" ? "bg-slate-400 hover:bg-slate-300" : "bg-teal-500 hover:bg-teal-400"
+                  }`}
+                >
+                  {sub.status === "done" ? "Reopen" : "Done"}
+                </button>
+                <button
+                  onClick={() => handleDeleteSubtask(sub)}
+                  className="px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold transition transform hover:scale-105 shadow-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-slate-400 italic">No subtasks yet. Add one below.</p>
       )}
-    </main>
+
+      {/* Add Subtask */}
+      <div className="flex flex-col sm:flex-row gap-3 mt-4">
+        <input
+          placeholder="New subtask..."
+          value={newSubtask}
+          onChange={e => setNewSubtask(e.target.value)}
+          className="flex-1 px-4 py-2 rounded-md bg-[#24303f] border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+        />
+        <button
+          onClick={addSubtask}
+          className="px-5 py-2 flex flex-nowrap gap-3 items-center bg-teal-500 hover:bg-teal-400 text-black font-semibold rounded-md transition transform hover:scale-105 shadow-md"
+        >
+          <FaPlus /> Add Subtask
+        </button>
+      </div>
+    </div>
+
+    {/* Confirmation Modal */}
+    {showConfirmModal && (
+      <ConfirmModal
+        message={modalAction === 'deleteTask'
+          ? "Confirm delete this task and its subtasks?"
+          : "Confirm delete this subtask?"}
+        onConfirm={modalAction === 'deleteTask' ? confirmDeleteTask : confirmDeleteSubtask}
+        onCancel={handleCancelModal}
+      />
+    )}
+  </div>
+</main>
+
   );
 }

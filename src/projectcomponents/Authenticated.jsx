@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import {
   FaPlusCircle,
   FaClipboardList,
@@ -11,41 +10,35 @@ import Link from "next/link";
 import TaskList from "@/components/TaskList";
 
 const DashboardLanding = () => {
-  const baseCard =
-    "p-6 rounded-xl shadow-md hover:shadow-xl transition duration-200 flex flex-col items-start gap-4";
+  const cardBase =
+    "p-6 rounded-xl shadow hover:shadow-xl transition-all duration-200 bg-[#1c1e26] border border-gray-700 hover:border-lime-500";
 
   return (
-    <main className="min-h-screen bg-green-600/10 text-white px-6 py-12">
+    <main className="min-h-screen bg-[#0f1117] text-white px-6 py-12 font-sans">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-lime-300 mb-4">
+        {/* Header */}
+        <header className="mb-14 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-lime-400 mb-3">
             Welcome to Project Manager
           </h1>
-          <p className="text-green-200 max-w-xl mx-auto">
-            Manage all your projects, tasks, and teams in one place.
-            Collaborate, track, and publish your work with ease.
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+            Manage all your projects, tasks, and teams in one place. Collaborate, track, and publish your work with clarity and control.
           </p>
         </header>
 
+        {/* Cards */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Link
-            href="/projects/create"
-            className={`${baseCard} bg-green-800/60 border border-green-700 hover:bg-green-700/60`}
-          >
+          <Link href="/projects/create" className={cardBase}>
             <FaPlusCircle size={28} className="text-lime-400" />
-            <h2 className="text-xl font-semibold text-lime-200">
+            <h2 className="text-xl font-semibold text-lime-300">
               Create New Project
             </h2>
-            <p className="text-green-300 text-sm">
-              Start a new project by defining goals, setting up tasks, and
-              assigning collaborators.
+            <p className="text-gray-400 text-sm">
+              Define goals, set tasks, and invite collaborators to kick off your next big idea.
             </p>
           </Link>
 
-          <Link
-            href="/tasks"
-            className={`${baseCard} bg-blue-800/60 border border-blue-700 hover:bg-blue-700/60`}
-          >
+          <Link href="/tasks" className={cardBase}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="text-cyan-300"
@@ -56,25 +49,17 @@ const DashboardLanding = () => {
               width={28}
               height={28}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-            <h2 className="text-xl font-semibold text-cyan-200">
+            <h2 className="text-xl font-semibold text-cyan-300">
               Task Management
             </h2>
-            <p className="text-blue-200 text-sm">
-              Track tasks, subtasks, deadlines, and organize your workflow
-              efficiently.
+            <p className="text-gray-400 text-sm">
+              Track tasks, deadlines, and streamline your team's workflow.
             </p>
           </Link>
 
-          <Link
-            href="/progress"
-            className={`${baseCard} bg-purple-800/60 border border-purple-700 hover:bg-purple-700/60`}
-          >
+          <Link href="/progress" className={cardBase}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="text-violet-300"
@@ -91,56 +76,49 @@ const DashboardLanding = () => {
                 d="M3 10h11M9 21V3m12 13h-6m6 0l-2-2m2 2l-2 2"
               />
             </svg>
-            <h2 className="text-xl font-semibold text-violet-200">
+            <h2 className="text-xl font-semibold text-violet-300">
               Daily Progress
             </h2>
-            <p className="text-purple-200 text-sm">
-              Log daily achievements, track updates, and maintain momentum on
-              your project.
+            <p className="text-gray-400 text-sm">
+              Log daily updates, boost accountability, and visualize project momentum.
             </p>
           </Link>
 
-          <Link
-            href="/projects"
-            className={`${baseCard} bg-green-800/60 border border-green-700 hover:bg-green-700/60`}
-          >
+          <Link href="/projects" className={cardBase}>
             <FaClipboardList size={28} className="text-lime-400" />
-            <h2 className="text-xl font-semibold text-lime-200">My Projects</h2>
-            <p className="text-green-300 text-sm">
-              View and manage all your ongoing and completed projects with
-              detailed breakdowns.
+            <h2 className="text-xl font-semibold text-lime-300">
+              My Projects
+            </h2>
+            <p className="text-gray-400 text-sm">
+              View your active and archived projects with full breakdowns and metadata.
             </p>
           </Link>
 
-          <Link
-            href="/collaborators"
-            className={`${baseCard} bg-green-800/60 border border-green-700 hover:bg-green-700/60`}
-          >
+          <Link href="/collaborators" className={cardBase}>
             <FaUsers size={28} className="text-lime-400" />
-            <h2 className="text-xl font-semibold text-lime-200">
+            <h2 className="text-xl font-semibold text-lime-300">
               Team Collaboration
             </h2>
-            <p className="text-green-300 text-sm">
-              Invite teammates, assign roles, and collaborate on project
-              features and updates in real time.
+            <p className="text-gray-400 text-sm">
+              Invite members, assign roles, and collaborate on project modules in real time.
             </p>
           </Link>
 
-          <Link
-            href="/documentation"
-            className={`${baseCard} bg-green-800/60 border border-green-700 hover:bg-green-700/60`}
-          >
+          <Link href="/documentation" className={cardBase}>
             <FaFileAlt size={28} className="text-lime-400" />
-            <h2 className="text-xl font-semibold text-lime-200">
+            <h2 className="text-xl font-semibold text-lime-300">
               Publish Documentation
             </h2>
-            <p className="text-green-300 text-sm">
-              Generate and export project documentation, PDF summaries, and
-              developer READMEs.
+            <p className="text-gray-400 text-sm">
+              Generate PDFs, READMEs, or release notes with a single click.
             </p>
           </Link>
         </section>
-        <TaskList />
+
+        {/* Task List Component */}
+        <div className="mt-16">
+          <TaskList />
+        </div>
       </div>
     </main>
   );
