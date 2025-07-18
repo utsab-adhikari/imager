@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
-  const router = useRouter();
 
   const [project, setProject] = useState(null);
   const [newTopic, setNewTopic] = useState("");
@@ -21,11 +20,18 @@ export default function ProjectDetailPage() {
   const addTopic = async () => {
     if (!newTopic.trim()) return;
     setLoading(true);
-    const res = await fetch(`/api/v1/projects/${id}/topics`, {
+    const res = await fetch(`/api/v1/projects/${id}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: newTopic }),
     });
+
+    if (!res.ok) {
+      toast.error("Failed to add topic");
+      setLoading(false);
+      return;
+    }
+
     const updated = await res.json();
     setProject(updated);
     setNewTopic("");
@@ -34,11 +40,15 @@ export default function ProjectDetailPage() {
 
   const updateTopicContent = async (index, content) => {
     const topicId = project.topics[index]._id;
-    await fetch(`/api/v1/projects/${id}/topics/${topicId}`, {
+    const res = await fetch(`/api/v1/projects/${id}/topics/${topicId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
     });
+
+    if (!res.ok) {
+      throw new Error("Failed to update");
+    }
   };
 
   const deleteTopic = async (topicId) => {
@@ -57,7 +67,7 @@ export default function ProjectDetailPage() {
       <h1 className="text-3xl font-bold mb-4 text-teal-300">{project.name}</h1>
       <p className="text-slate-300 mb-4">{project.description}</p>
 
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-4 mb-6 flex-wrap">
         {project.links?.website && (
           <a
             href={project.links.website}
@@ -87,6 +97,21 @@ export default function ProjectDetailPage() {
         )}
       </div>
 
+      <div className="flex gap-4 mb-8 flex-wrap">
+        <button
+          onClick={() => toast("Add Collaborator coming soon 🚧")}
+          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded shadow"
+        >
+          ➕ Add Collaborator
+        </button>
+        <button
+          onClick={() => toast("Publish feature coming soon 🚀")}
+          className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded shadow"
+        >
+          🚀 Publish
+        </button>
+      </div>
+
       <hr className="border-slate-700 mb-6" />
 
       <div className="mb-4">
@@ -111,31 +136,61 @@ export default function ProjectDetailPage() {
       ) : (
         <div className="space-y-6">
           {project.topics.map((topic, index) => (
-            <div
+            <TopicCard
               key={topic._id}
-              className="bg-[#24303f] p-4 rounded border border-slate-700"
-            >
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-semibold text-teal-300">
-                  {topic.title}
-                </h2>
-                <button
-                  onClick={() => deleteTopic(topic._id)}
-                  className="text-red-400 hover:text-red-300 text-sm"
-                >
-                  ✖ Delete
-                </button>
-              </div>
-              <textarea
-                defaultValue={topic.content}
-                onBlur={(e) => updateTopicContent(index, e.target.value)}
-                className="w-full bg-slate-800 text-white p-3 rounded resize-y border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                rows="5"
-              />
-            </div>
+              topic={topic}
+              index={index}
+              updateTopicContent={updateTopicContent}
+              deleteTopic={deleteTopic}
+            />
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// 🧩 Subcomponent for each topic
+function TopicCard({ topic, index, updateTopicContent, deleteTopic }) {
+  const [content, setContent] = useState(topic.content || "");
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateTopicContent(index, content);
+      toast.success("Content saved");
+    } catch (err) {
+      toast.error("Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-[#24303f] p-4 rounded border border-slate-700">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-lg font-semibold text-teal-300">{topic.title}</h2>
+        <button
+          onClick={() => deleteTopic(topic._id)}
+          className="text-red-400 hover:text-red-300 text-sm"
+        >
+          ✖ Delete
+        </button>
+      </div>
+      <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full bg-slate-800 text-white p-3 rounded resize-y border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        rows="5"
+      />
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="mt-2 bg-teal-600 hover:bg-teal-500 text-black px-4 py-2 rounded transition"
+      >
+        {saving ? "Saving..." : "Save"}
+      </button>
     </div>
   );
 }
