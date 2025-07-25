@@ -13,7 +13,6 @@ const Uploader = () => {
       setImageUrls((prev) => prev.filter((_, idx) => idx !== indexToRemove));
     };
     
-    console.log(imageUrls);
   return (
     <div className="p-4 space-y-6">
       <ImageUploader onUpload={handleImageUpload} />
