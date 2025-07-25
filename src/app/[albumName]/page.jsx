@@ -267,10 +267,8 @@ export default function AlbumDetailsPage() {
                         className="absolute top-2 right-2 bg-black bg-opacity-60 text-white rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold hover:bg-opacity-80 transition-opacity duration-200"
                         title="More options"
                       >
-                        &#8942; {/* Vertical ellipsis character */}
+                        &#8942;
                       </button>
-
-                      {/* Dropdown menu */}
                       {openMenuId === (imageDoc._id + "-" + i) && (
                         <div
                           ref={menuRef} // Attach ref here
@@ -299,7 +297,6 @@ export default function AlbumDetailsPage() {
         </>
       )}
 
-      {/* Image Details Modal */}
       {showDetailsModal && selectedImageDetails && (
         <div className="fixed inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-lg w-full border border-gray-700 relative">
