@@ -19,7 +19,7 @@ async function connectDB() {
 
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGO_URI, {
-      dbName: "blog",
+      dbName: "imager",
       bufferCommands: false,
     }).then((mongoose) => {
       console.log("✅ MongoDB Connected");

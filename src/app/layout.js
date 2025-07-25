@@ -22,12 +22,7 @@ export default function RootLayout({ children }) {
   }, [pathname]);
 
   return (
-    <html lang="en" className="dark scroll-smooth">
-      <head>
-        <title>Project Manager Dashboard</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      </head>
-
+    <html>
       <body className="flex min-h-screen flex-col bg-[#0f1117] text-white font-sans">
         <SessionProvider>
           <SidebarProvider>

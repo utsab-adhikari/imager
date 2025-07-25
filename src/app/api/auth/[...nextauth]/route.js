@@ -26,6 +26,7 @@ export const authOptions = {
           session.user.name = user.name;
           session.user.image = user.image;
           session.user.role = user.role;
+          session.user.family = user.family;
         }
       }
       return session;

@@ -1,26 +1,24 @@
 "use client";
-import DashboardLanding from "@/projectcomponents/Authenticated";
-import Unauthenticated from "@/projectcomponents/Unauthenticated";
+import Authenticated from "@/components/General/Authenticated";
+import Loader from "@/components/General/Loader";
+import Unauthenticated from "@/components/General/Unauthenticated";
+import Uploader from "@/ImageComponents/Uploader";
 import { useSession } from "next-auth/react";
+import React from "react";
 
-export default function ProjectsPage() {
-  const { status } = useSession();
+const page = () => {
+  const {status} = useSession();
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        <span className="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full"></span>
-      </div>
-    );
+  if(status === "loading") {
+    return <Loader/>
   }
 
-  if (status === "unauthenticated") {
-    return <Unauthenticated />;
+  if(status === "unauthenticated") {
+    return <Unauthenticated/>
   }
-
-  if (status === "authenticated") {
-    return <DashboardLanding />;
+  if(status === "authenticated") {
+    return <Authenticated/>
   }
+};
 
-  return null; 
-}
+export default page;
